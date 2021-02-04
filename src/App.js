@@ -1,23 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+/** @jsxImportSource theme-ui */
+import React, { useState } from 'react'
+import ThreeCanvas from './ThreeCanvas'
+
+const Button = ({roll, setRoll}) => {
+  return (
+    <div sx={{height:'auto', width:'auto', padding:'20px', bg:'red'}} onClick={(e)=>setRoll(!roll)}>
+      ROLL THE DICE
+    </div>
+  )
+}
 
 function App() {
+  const [roll, setRoll] = useState(false)
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div sx={{height:'100vh', width:'100vw', display:'flex', alignItems:'center',justifyContent:'center'}}>
+      <Button roll={roll} setRoll={setRoll}/>
+      <ThreeCanvas roll={roll}/>
     </div>
   );
 }
