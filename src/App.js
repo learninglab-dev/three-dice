@@ -2,13 +2,14 @@
 import React, { useState } from "react";
 import ThreeCanvas from "./ThreeCanvas";
 import create from "zustand";
-import { Controls } from "react-three-gui";
 
 export const useStore = create((set) => ({
   roll: null,
   setRoll: (x) => set({ roll: x }),
   lookAt: { x: 0, y: 0, z: 0 },
   setLookAt: (x) => set({ lookAt: x }),
+  dicePos: { x: 0, y: 0, z: 0 },
+  setDicePos: (x) => set({ dicePos: x }),
 }));
 
 const Button = () => {
@@ -37,10 +38,7 @@ function App() {
       }}
     >
       <Button />
-      <Controls.Provider>
-        <ThreeCanvas roll={roll} />
-        <Controls />
-      </Controls.Provider>
+      <ThreeCanvas roll={roll} />
     </div>
   );
 }
