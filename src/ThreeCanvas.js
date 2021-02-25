@@ -39,30 +39,30 @@ const Dice = (props) => {
   const position = useRef(null);
   const cameraNeedsUpdate = useRef(true);
 
-  const updateCamera = () => {
-    if (cameraNeedsUpdate.current === true) {
-      setDicePos({
-        x: position.current[0],
-        y: position.current[1],
-        z: position.current[2],
-      });
-      console.log("moved camera");
-      console.log(position.current);
-    }
-  };
+  // const updateCamera = () => {
+  //   if (cameraNeedsUpdate.current === true) {
+  //     setDicePos({
+  //       x: position.current[0],
+  //       y: position.current[1],
+  //       z: position.current[2],
+  //     });
+  //     console.log("moved camera");
+  //     console.log(position.current);
+  //   }
+  // };
 
-  const handleVelocityChange = (v) => {
-    velocity.current = v;
-    if (
-      Math.abs(velocity.current[0]) < 0.15 &&
-      Math.abs(velocity.current[1]) < 0.15 &&
-      Math.abs(velocity.current[2]) < 0.15
-    ) {
-      updateCamera();
-      cameraNeedsUpdate.current = false;
-    }
-    // console.log(v);
-  };
+  // const handleVelocityChange = (v) => {
+  //   // velocity.current = v;
+  //   // if (
+  //   //   Math.abs(velocity.current[0]) < 0.15 &&
+  //   //   Math.abs(velocity.current[1]) < 0.15 &&
+  //   //   Math.abs(velocity.current[2]) < 0.15
+  //   // ) {
+  //   //   updateCamera();
+  //   //   cameraNeedsUpdate.current = false;
+  //   // }
+  //   console.log(v);
+  // };
 
   const getRandFloat = (low, high) => {
     const result = Math.random() * (high - low) + low;
@@ -77,14 +77,16 @@ const Dice = (props) => {
 
   useEffect(() => {
     const updatePosAndCamera = (p) => {
+      const pX = parseFloat(p[0].toFixed(1));
+      const pY = parseFloat(p[1].toFixed(1));
+      const pZ = parseFloat(p[2].toFixed(1));
       setDicePos({
-        x: p[0],
-        y: p[1],
-        z: p[2],
+        x: pX,
+        y: pY,
+        z: pZ,
       });
-      position.current = p;
+      // position.current = [pX, pY, pZ];
     };
-    // console.log(v);
 
     console.log("effect!");
     if (api) {
@@ -172,7 +174,11 @@ const ThreeCanvas = ({ roll }) => {
         shadow-mapSize-width={512}
       />
       <AimCamera lookAt={lookAt} />
-      <Physics defaultContactMaterial={{ friction: 1 }}>
+      <Physics
+        defaultContactMaterial={{
+          friction: 10,
+        }}
+      >
         <Scene />
       </Physics>
     </Canvas>
