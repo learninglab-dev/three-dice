@@ -141,7 +141,7 @@ const Scene = () => {
 };
 
 const AimCamera = ({ lookAt }) => {
-  const camHeight = 20;
+  const camHeight = 10;
   const dicePos = useStore((state) => state.dicePos);
   const cam = useRef();
   useEffect(() => {
