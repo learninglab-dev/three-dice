@@ -2,11 +2,31 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Canvas, useFrame } from "react-three-fiber";
 import { Physics, usePlane, useBox } from "@react-three/cannon";
-import { PerspectiveCamera, RoundedBox, Box, Plane } from "@react-three/drei";
+import {
+  PerspectiveCamera,
+  Box,
+  Plane,
+  useTexture,
+  useCubeTexture,
+} from "@react-three/drei";
 import { useSpring, animated } from "@react-spring/three";
 import { useStore } from "./App";
+import * as THREE from "three";
+import pokertable from "./pokertable.jpeg";
+import faceOne from "./diceFaces/one.png";
+import faceTwo from "./diceFaces/two.png";
+import faceThree from "./diceFaces/three.png";
+import faceFour from "./diceFaces/four.png";
+import faceFive from "./diceFaces/five.png";
+import faceSix from "./diceFaces/six.png";
 
 const Dice = (props) => {
+  const texture1 = useTexture(faceOne);
+  const texture2 = useTexture(faceTwo);
+  const texture3 = useTexture(faceThree);
+  const texture4 = useTexture(faceFour);
+  const texture5 = useTexture(faceFive);
+  const texture6 = useTexture(faceSix);
   const setRoll = useStore((state) => state.setRoll);
   const setDicePos = useStore((state) => state.setDicePos);
   const [ref, api] = useBox(() => ({
@@ -34,13 +54,14 @@ const Dice = (props) => {
   const handleVelocityChange = (v) => {
     velocity.current = v;
     if (
-      Math.abs(velocity.current[0]) < 0.1 &&
-      Math.abs(velocity.current[1]) < 0.1 &&
-      Math.abs(velocity.current[2]) < 0.1
+      Math.abs(velocity.current[0]) < 0.15 &&
+      Math.abs(velocity.current[1]) < 0.15 &&
+      Math.abs(velocity.current[2]) < 0.15
     ) {
       updateCamera();
       cameraNeedsUpdate.current = false;
     }
+    // console.log(v);
   };
 
   const getRandFloat = (low, high) => {
@@ -48,30 +69,56 @@ const Dice = (props) => {
     return result;
   };
 
+  const getSign = (float) => {
+    const result = Math.random() < 0.5 ? -1 : 1;
+    return result * float;
+  };
+  console.log(ref.current);
+
   useEffect(() => {
+    const updatePosAndCamera = (p) => {
+      setDicePos({
+        x: p[0],
+        y: p[1],
+        z: p[2],
+      });
+      position.current = p;
+    };
+    // console.log(v);
+
+    console.log("effect!");
     if (api) {
       const roll = () => {
         cameraNeedsUpdate.current = true;
         console.log("roll set!");
-        api.applyLocalForce(
-          [0, getRandFloat(300, 600), 0],
-          [getRandFloat(0, 0.5), 0, getRandFloat(0, 0.5)]
+        api.applyImpulse(
+          [getRandFloat(-5, 5), getRandFloat(10, 20), getRandFloat(-5, 5)],
+          [getRandFloat(-0.1, 0.1), 0, getRandFloat(-0.1, 0.1)]
         );
       };
       setRoll(roll);
-      api.velocity.subscribe((v) => handleVelocityChange(v));
-      api.position.subscribe((p) => (position.current = p));
+      // api.velocity.subscribe((v) => handleVelocityChange(v));
+      api.position.subscribe((p) => updatePosAndCamera(p));
     }
   }, [api]);
 
   return (
-    <RoundedBox {...props} ref={ref} args={[1, 1, 1]} radius={0.05}>
-      <meshStandardMaterial attach="material" color="red" />
-    </RoundedBox>
+    <Box {...props} ref={ref} args={[1, 1, 1]} radius={0.05}>
+      <meshStandardMaterial attachArray="material" map={texture1} />
+      <meshStandardMaterial attachArray="material" map={texture2} />
+      <meshStandardMaterial attachArray="material" map={texture3} />
+      <meshStandardMaterial attachArray="material" map={texture4} />
+      <meshStandardMaterial attachArray="material" map={texture5} />
+      <meshStandardMaterial attachArray="material" map={texture6} />
+    </Box>
   );
 };
 
 const Ground = (props) => {
+  const texture = useTexture(pokertable);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(50, 50);
   const [ref] = usePlane(() => ({
     rotation: [-Math.PI / 2, 0, 0],
     position: [0, -2, 0],
@@ -79,7 +126,7 @@ const Ground = (props) => {
   }));
   return (
     <Plane ref={ref} args={[1000, 1000]} receiveShadow>
-      <meshStandardMaterial attach="material" color="white" />
+      <meshStandardMaterial attach="material" color="white" map={texture} />
     </Plane>
   );
 };
@@ -94,22 +141,20 @@ const Scene = () => {
 };
 
 const AimCamera = ({ lookAt }) => {
-  const camHeight = 5;
+  const camHeight = 20;
   const dicePos = useStore((state) => state.dicePos);
   const cam = useRef();
   useEffect(() => {
     cam.current.lookAt(lookAt.x, lookAt.y, lookAt.z);
   }, []);
+  const wrapper = useRef();
 
-  if (cam.current) {
-    console.log(cam.current.rotation);
-  }
   const { camPosition } = useSpring({
-    camPosition: [dicePos.x, camHeight, dicePos.z],
+    camPosition: [dicePos.x, dicePos.y + camHeight, dicePos.z],
   });
 
   return (
-    <animated.mesh position={camPosition}>
+    <animated.mesh ref={wrapper} position={camPosition}>
       <PerspectiveCamera makeDefault ref={cam} fov={60} />
     </animated.mesh>
   );
@@ -127,7 +172,7 @@ const ThreeCanvas = ({ roll }) => {
         shadow-mapSize-width={512}
       />
       <AimCamera lookAt={lookAt} />
-      <Physics>
+      <Physics defaultContactMaterial={{ friction: 1 }}>
         <Scene />
       </Physics>
     </Canvas>

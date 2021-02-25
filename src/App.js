@@ -1,5 +1,5 @@
 /** @jsxImportSource theme-ui */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ThreeCanvas from "./ThreeCanvas";
 import create from "zustand";
 
@@ -15,10 +15,36 @@ export const useStore = create((set) => ({
 const Button = () => {
   const roll = useStore((state) => state.roll);
   console.log(roll);
+  const [color, setColor] = useState("red");
+  const handleClick = () => {
+    setColor("grey");
+    roll();
+  };
+  useEffect(() => {
+    console.log(color);
+    if (color === "grey") {
+      const timeout = setTimeout(() => setColor("red"), 2000);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [color]);
   return (
     <div
-      sx={{ height: "auto", width: "auto", padding: "20px", bg: "red" }}
-      onClick={roll}
+      sx={{
+        height: "auto",
+        width: "auto",
+        padding: "2vmin",
+        bg: color,
+        color: "white",
+        zIndex: 10,
+        borderRadius: "2vmin",
+        bottom: "25vh",
+        position: "absolute",
+        fontFamily: "sans-serif",
+        cursor: "pointer",
+      }}
+      onClick={handleClick}
     >
       ROLL THE DICE
     </div>
