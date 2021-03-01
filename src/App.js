@@ -1,34 +1,27 @@
 /** @jsxImportSource theme-ui */
-import React, { useState, useEffect } from "react";
-import ThreeCanvas from "./ThreeCanvas";
-import create from "zustand";
+import { useState, useEffect } from "react"
+import ThreeCanvas from "./ThreeCanvas"
+import { useStore } from './Store'
 
-export const useStore = create((set) => ({
-  roll: null,
-  setRoll: (x) => set({ roll: x }),
-  lookAt: { x: 0, y: 0, z: 0 },
-  setLookAt: (x) => set({ lookAt: x }),
-  dicePos: { x: 0, y: 0, z: 0 },
-  setDicePos: (x) => set({ dicePos: x }),
-}));
 
+//a simple button, BUT we had to use zustand (useStore) to get the roll function out of the three canvas context and here into button
 const Button = () => {
-  const roll = useStore((state) => state.roll);
-  console.log(roll);
-  const [color, setColor] = useState("red");
+  const roll = useStore(state => state.roll)
+  const [color, setColor] = useState("red")
+
   const handleClick = () => {
-    setColor("grey");
-    roll();
-  };
+    setColor("grey")
+    roll()
+  }
+
+  //using a timeout here because figuring out when the dice comes to a stop, well... velocity never goes to 0 and changes every frame in cannon
   useEffect(() => {
-    console.log(color);
     if (color === "grey") {
-      const timeout = setTimeout(() => setColor("red"), 2000);
-      return () => {
-        clearTimeout(timeout);
-      };
+      const timeout = setTimeout(() => setColor("red"), 2000)
+      return () => clearTimeout(timeout)
     }
-  }, [color]);
+  }, [color])
+
   return (
     <div
       sx={{
@@ -48,11 +41,11 @@ const Button = () => {
     >
       ROLL THE DICE
     </div>
-  );
-};
+  )
+}
 
-function App() {
-  const [roll, setRoll] = useState(false);
+
+export default function App() {
   return (
     <div
       sx={{
@@ -61,12 +54,9 @@ function App() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-      }}
-    >
+      }}>
       <Button />
-      <ThreeCanvas roll={roll} />
+      <ThreeCanvas />
     </div>
-  );
+  )
 }
-
-export default App;
